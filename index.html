@@ -94,6 +94,16 @@
       margin-bottom: 0.5rem;
       animation: sway 3s ease-in-out infinite alternate;
     }
+
+    /* Gentle glow for hero elements */
+    .glow {
+      animation: gentleGlow 3.8s ease-in-out infinite;
+    }
+    @keyframes gentleGlow {
+      0% { filter: drop-shadow(0 0 0 rgba(232,85,106,0)); }
+      40% { filter: drop-shadow(0 8px 22px rgba(232,85,106,0.10)); }
+      100% { filter: drop-shadow(0 0 0 rgba(232,85,106,0)); }
+    }
     @keyframes sway { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
 
     .hero-wish {
@@ -127,6 +137,11 @@
       color: var(--muted);
       text-transform: uppercase;
     }
+
+    /* hero sparkles container */
+    .hero-sparkles { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+    .hero-sparkles .spark { position: absolute; width: 8px; height: 8px; border-radius:50%; opacity:0; transform: translateY(0) scale(0.6); }
+    @keyframes sparkUp { 0%{ opacity:0; transform: translateY(0) scale(0.6);} 10%{ opacity:1;} 70%{ opacity:0.9; transform: translateY(-42px) scale(1);} 100%{ opacity:0; transform: translateY(-90px) scale(0.8);} }
 
     .counter-row {
       display: flex;
@@ -1227,6 +1242,63 @@
       // expose to window and don't auto-run; caller will trigger on button click
       try { window.launchConfetti = launchConfetti; } catch(e){}
     })();
+
+    // Subtle pleasant effects: hero sparkles, glow and parallax
+    (function(){
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function makeSparkles(container, count = 10) {
+        if (prefersReduced) return;
+        for (let i=0;i<count;i++){
+          const s = document.createElement('div');
+          s.className = 'spark';
+          s.style.background = ['#F4A614','#E8556A','#F9C74F','#6B9E6C','#D4840A'][Math.floor(Math.random()*5)];
+          s.style.left = Math.random()*100 + '%';
+          s.style.top  = Math.random()*60 + 20 + '%';
+          const size = 6 + Math.random()*8;
+          s.style.width = size + 'px';
+          s.style.height = size + 'px';
+          s.style.animation = `sparkUp ${2.8 + Math.random()*1.6}s ${Math.random()*1.2}s ease-out forwards`;
+          container.appendChild(s);
+          setTimeout(()=>{ try{ s.remove(); }catch(e){} }, 7000);
+        }
+      }
+
+      // Hero parallax subtle movement
+      (function(){
+        if (prefersReduced) return;
+        const wreath = document.querySelector('.hero-wreath');
+        const names  = document.querySelector('.hero-names');
+        if (!wreath && !names) return;
+        let tx = 0, ty = 0, lx = 0, ly = 0;
+        function onMove(e){
+          const x = (e.clientX / window.innerWidth - 0.5) * 12;
+          const y = (e.clientY / window.innerHeight - 0.5) * 8;
+          tx = x; ty = y;
+        }
+        function raf(){ lx += (tx - lx) * 0.08; ly += (ty - ly) * 0.08; if (wreath) wreath.style.transform = `translate(${lx*0.6}px, ${ly*0.3}px)`; if (names) names.style.transform = `translate(${lx*0.25}px, ${ly*0.2}px)`; requestAnimationFrame(raf); }
+        window.addEventListener('mousemove', onMove, {passive:true}); raf();
+      })();
+
+      // Add sparkles and glow when hero becomes visible
+      const heroObserver = new IntersectionObserver(entries => {
+        entries.forEach(ent => {
+          if (ent.isIntersecting) {
+            const hero = ent.target;
+            let sp = hero.querySelector('.hero-sparkles');
+            if (!sp) { sp = document.createElement('div'); sp.className = 'hero-sparkles'; hero.appendChild(sp); }
+            makeSparkles(sp, 12);
+            const wreath = hero.querySelector('.hero-wreath');
+            const names  = hero.querySelector('.hero-names');
+            if (wreath) wreath.classList.add('glow');
+            if (names)  names.classList.add('glow');
+            heroObserver.disconnect();
+          }
+        });
+      }, { threshold: 0.15 });
+      document.querySelectorAll('.hero').forEach(h => heroObserver.observe(h));
+    })();
+
     /* ══════════════════════════════════════
        INTRO SCREEN TRANSITION
     ══════════════════════════════════════ */
