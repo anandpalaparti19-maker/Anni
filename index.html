@@ -34,6 +34,17 @@
       opacity: 0 !important;
     }
 
+    /* Birthday blast confetti canvas */
+    .confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99999;
+      display: block;
+    }
+
     body {
       background: var(--cream);
       color: var(--text);
@@ -1149,6 +1160,72 @@
       mo.observe(document.documentElement, { childList: true, subtree: true });
       // also attempt one last time after load
       window.addEventListener('load', removeVercelEls);
+    })();
+    
+    // Birthday blast confetti - simple lightweight canvas implementation
+    (function(){
+      function launchConfetti(duration = 4000, particleCount = 160) {
+        const canvas = document.createElement('canvas');
+        canvas.className = 'confetti-canvas';
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+
+        const colors = ['#F4A614','#E8556A','#F9C74F','#6B9E6C','#D4840A','#FFCBA4','#FFFFFF'];
+
+        function rand(min, max){ return Math.random() * (max - min) + min; }
+
+        const particles = [];
+        for(let i=0;i<particleCount;i++){
+          particles.push({
+            x: rand(0, canvas.width),
+            y: rand(-canvas.height, 0),
+            w: rand(6, 12),
+            h: rand(8, 14),
+            vx: rand(-2.5, 2.5),
+            vy: rand(2, 6),
+            rot: rand(0, Math.PI*2),
+            vr: rand(-0.12, 0.12),
+            color: colors[Math.floor(Math.random()*colors.length)],
+            tilt: rand(-0.3,0.3)
+          });
+        }
+
+        let start = performance.now();
+        function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+
+        function draw(now){
+          const elapsed = now - start;
+          ctx.clearRect(0,0,canvas.width, canvas.height);
+          particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy + Math.sin((elapsed + p.x) * 0.002) * 0.5;
+            p.rot += p.vr;
+            // draw rectangle with rotation
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+            ctx.restore();
+          });
+          // stop after duration and fade out
+          if (elapsed < duration) {
+            requestAnimationFrame(draw);
+          } else {
+            // fade out quickly then remove
+            canvas.style.transition = 'opacity 600ms ease';
+            canvas.style.opacity = '0';
+            setTimeout(()=>{ try{ window.removeEventListener('resize', resize); canvas.remove(); }catch(e){} }, 650);
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+
+      // Run on first visible load
+      document.addEventListener('DOMContentLoaded', ()=> setTimeout(()=> launchConfetti(4500,200), 350));
     })();
     /* ══════════════════════════════════════
        INTRO SCREEN TRANSITION
