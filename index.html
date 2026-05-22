@@ -1369,14 +1369,35 @@
     /* ══════════════════════════════════════
        ANNIVERSARY COUNTER
     ══════════════════════════════════════ */
+    // Wedding date/time (ISO). Change the time here to control when the anniversary rolls over (e.g. '2021-05-23T12:00:00')
+    const WED_ISO = '2021-05-23T12:00:00';
     function updateCounter() {
-      const wed = new Date('2021-05-23');
+      const wed = new Date(WED_ISO);
       const now = new Date();
-      let years  = now.getFullYear() - wed.getFullYear();
-      let months = now.getMonth()     - wed.getMonth();
-      let days   = now.getDate()      - wed.getDate();
-      if (days < 0)   { months--; const prev = new Date(now.getFullYear(), now.getMonth(), 0); days += prev.getDate(); }
-      if (months < 0) { years--; months += 12; }
+
+      // Determine full years elapsed taking the specified anniversary time into account
+      let years = now.getFullYear() - wed.getFullYear();
+      // anniversary moment in the current year at the wedding's time
+      const annivThisYear = new Date(now.getFullYear(), wed.getMonth(), wed.getDate(), wed.getHours(), wed.getMinutes(), wed.getSeconds(), wed.getMilliseconds());
+      if (now < annivThisYear) years--;
+
+      // Build a reference date advanced by the counted years
+      const ref = new Date(wed);
+      ref.setFullYear(wed.getFullYear() + years);
+
+      // Count months by advancing month-by-month from the reference until passing 'now'
+      let months = 0;
+      while (true) {
+        const next = new Date(ref);
+        next.setMonth(next.getMonth() + 1);
+        if (next <= now) { ref.setMonth(ref.getMonth() + 1); months++; }
+        else break;
+      }
+
+      // Remaining full days
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const days = Math.floor((now - ref) / msPerDay);
+
       const boxes = [
         { num: years,  label: 'Years'  },
         { num: months, label: 'Months' },
