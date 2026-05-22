@@ -1426,7 +1426,7 @@
   <!-- ── FINAL CREDITS (moved to end) ── -->
   <section class="final-credits" aria-hidden="false" style="text-align:center;padding:1.5rem 1rem;">
     <span class="f-emoji" style="font-size:2.25rem;display:block;margin-bottom:.5rem;">🌸</span>
-    <div class="f-text" style="font-family:Playfair Display, serif;font-size:1.05rem;color:var(--muted);">Made with love for Govardhan &amp; Swapna · Anniversary 2025</div>
+    <div class="f-text" style="font-family:Playfair Display, serif;font-size:1.05rem;color:var(--muted);">Made with love for Govardhan &amp; Swapna · Anniversary <span id="final-year">2025</span></div>
     <div style="margin-top:.6rem;">Cherished moments · Your Beautiful Story · double tap the heart to reveal</div>
   </section>
 
@@ -1588,8 +1588,18 @@
   </script>
    <footer>
     <span class="ft-heart">🌸</span>
-    Made with love for Govardhan &amp; Swapna · Anniversary 2026
+    Made with love for Govardhan &amp; Swapna · Anniversary <span id="footer-year">2026</span>
   </footer>
+
+  <script>
+    (function(){
+      const y = new Date().getFullYear();
+      const fy = document.getElementById('final-year');
+      const ftr = document.getElementById('footer-year');
+      if (fy) fy.textContent = y;
+      if (ftr) ftr.textContent = y;
+    })();
+  </script>
   
 
 </body>
