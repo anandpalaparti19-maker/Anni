@@ -26,6 +26,14 @@
 
     html { scroll-behavior: smooth; }
 
+    /* Hide Vercel preview toolbar / inspector if injected in preview environments */
+    [data-vercel], [id^="__vercel"], [class*="vercel"], #vercel, #vercel-inspector, #vercel-toolbar, iframe[src*="vercel"], .vercel-badge {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      opacity: 0 !important;
+    }
+
     body {
       background: var(--cream);
       color: var(--text);
@@ -1130,6 +1138,18 @@
   </div>
  
   <script>
+    // Remove any Vercel preview toolbar elements that may be injected in preview builds
+    (function(){
+      const selector = '[data-vercel], [id^="__vercel"], [class*="vercel"], #vercel, #vercel-inspector, #vercel-toolbar, iframe[src*="vercel"], .vercel-badge';
+      function removeVercelEls(){
+        try{ document.querySelectorAll(selector).forEach(el=>el.remove()); }catch(e){}
+      }
+      removeVercelEls();
+      const mo = new MutationObserver(removeVercelEls);
+      mo.observe(document.documentElement, { childList: true, subtree: true });
+      // also attempt one last time after load
+      window.addEventListener('load', removeVercelEls);
+    })();
     /* ══════════════════════════════════════
        INTRO SCREEN TRANSITION
     ══════════════════════════════════════ */
