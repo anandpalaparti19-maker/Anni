@@ -1369,8 +1369,8 @@
     /* ══════════════════════════════════════
        ANNIVERSARY COUNTER
     ══════════════════════════════════════ */
-    // Wedding date/time (ISO). Change the time here to control when the anniversary rolls over (e.g. '2021-05-23T12:00:00')
-    const WED_ISO = '2021-05-23T12:00:00';
+    // Wedding date/time (ISO). Change the time here to control when the anniversary rolls over (e.g. '2021-05-23T00:00:00' for midnight)
+    const WED_ISO = '2021-05-23T00:00:00';
     function updateCounter() {
       const wed = new Date(WED_ISO);
       const now = new Date();
