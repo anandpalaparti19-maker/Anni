@@ -1418,9 +1418,19 @@
     }
 
     function downloadVideo() {
+      // Prefer the video element's actual source so downloads match playback
+      const vid = document.getElementById('anniv-video');
+      let src = '';
+      if (vid) {
+        const sourceEl = vid.querySelector('source');
+        src = (sourceEl && sourceEl.src) || vid.currentSrc || vid.src || '';
+      }
+      // fallback to the bundled video file if present
+      if (!src) src = 'photos/InShot_20260522_211226944.mp4';
+      const filename = src.split('/').pop().split('?')[0] || 'anniversary-video.mp4';
       const a = document.createElement('a');
-      a.href = 'your-video.mp4';
-      a.download = 'govardhan-swapna-anniversary.mp4';
+      a.href = src;
+      a.setAttribute('download', filename);
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
