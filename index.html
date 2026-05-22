@@ -1224,13 +1224,14 @@
         requestAnimationFrame(draw);
       }
 
-      // Run on first visible load
-      document.addEventListener('DOMContentLoaded', ()=> setTimeout(()=> launchConfetti(4500,200), 350));
+      // expose to window and don't auto-run; caller will trigger on button click
+      try { window.launchConfetti = launchConfetti; } catch(e){}
     })();
     /* ══════════════════════════════════════
        INTRO SCREEN TRANSITION
     ══════════════════════════════════════ */
     function startIntroTransition() {
+      try { if (window.launchConfetti) window.launchConfetti(4500,200); } catch(e){}
       const introFlower = document.getElementById('intro-flower');
       const introMsg    = document.getElementById('intro-msg');
       const introBtn    = document.getElementById('intro-btn');
